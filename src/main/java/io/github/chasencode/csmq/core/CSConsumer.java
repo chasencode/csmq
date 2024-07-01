@@ -1,5 +1,9 @@
 package io.github.chasencode.csmq.core;
 
+import io.github.chasencode.csmq.model.CSMessage;
+
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * message consumer
  * @Program: csmq
@@ -9,13 +13,16 @@ package io.github.chasencode.csmq.core;
  **/
 public class CSConsumer<T> {
 
-
+    private String id;
     CSBroker broker;
     String topic;
     CSMq mq;
 
+    static AtomicInteger idgen = new AtomicInteger(0);
+
     public CSConsumer(CSBroker broker) {
         this.broker = broker;
+        this.id = "CID" + idgen.getAndIncrement();
     }
 
     public void subscribe(String topic) {

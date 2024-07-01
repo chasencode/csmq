@@ -2,7 +2,7 @@ package io.github.chasencode.csmq.demo;
 
 import io.github.chasencode.csmq.core.CSBroker;
 import io.github.chasencode.csmq.core.CSConsumer;
-import io.github.chasencode.csmq.core.CSMessage;
+import io.github.chasencode.csmq.model.CSMessage;
 import io.github.chasencode.csmq.core.CSProducer;
 
 import java.io.IOException;

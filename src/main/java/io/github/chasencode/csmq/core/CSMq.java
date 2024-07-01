@@ -1,5 +1,6 @@
 package io.github.chasencode.csmq.core;
 
+import io.github.chasencode.csmq.model.CSMessage;
 import lombok.SneakyThrows;
 
 import java.util.ArrayList;

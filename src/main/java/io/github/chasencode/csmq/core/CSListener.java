@@ -1,5 +1,7 @@
 package io.github.chasencode.csmq.core;
 
+import io.github.chasencode.csmq.model.CSMessage;
+
 /**
  * @Program: csmq
  * @Description:

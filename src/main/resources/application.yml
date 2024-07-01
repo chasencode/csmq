@@ -1,3 +1,5 @@
 spring:
     application:
         name: csmq
+server:
+    port: 8765

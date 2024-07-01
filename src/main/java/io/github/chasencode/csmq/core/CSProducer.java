@@ -1,5 +1,6 @@
 package io.github.chasencode.csmq.core;
 
+import io.github.chasencode.csmq.model.CSMessage;
 import lombok.AllArgsConstructor;
 
 /**
@@ -13,7 +14,7 @@ public class CSProducer {
 
     CSBroker broker;
 
-    public boolean send(String topic,CSMessage message) {
+    public boolean send(String topic, CSMessage message) {
         CSMq mq = broker.find(topic);
         if (mq == null) {
             throw new RuntimeException("Topic not found: " + topic);
