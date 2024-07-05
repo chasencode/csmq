@@ -6,6 +6,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * @Program: csmq
@@ -13,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * @Author: Chasen
  * @Create: 2024-07-01 21:57
  **/
-@Controller
+@RestController
 @RequestMapping("/csmq")
 public class MQServer {
 
@@ -21,19 +24,27 @@ public class MQServer {
     // send
     @RequestMapping("/send")
     public Result<String> send(@RequestParam("t") String topic,
-                               @RequestParam("cid") String consumerId,
                                @RequestBody CSMessage<String> message) {
         ;
-        return Result.ok("" + MessageQueue.send(topic, consumerId, message));
+        return Result.ok("" + MessageQueue.send(topic, message));
     }
 
     // receive
-    @RequestMapping("/receive")
+    @RequestMapping("/recv")
     public Result<CSMessage<?>> receive(@RequestParam("t") String topic,
-                                             @RequestParam("cid") String consumerId,
-                                             @RequestBody CSMessage<String> message) {
+                                             @RequestParam("cid") String consumerId) {
         return Result.msg(MessageQueue.recv(topic, consumerId));
     }
+
+
+    // receive
+    @RequestMapping("/batch")
+    public Result<List<CSMessage<?>>> batch(@RequestParam("t") String topic,
+                                            @RequestParam("cid") String consumerId,
+                                            @RequestParam(name = "size", defaultValue = "1000") Integer size) {
+        return Result.msg(MessageQueue.batch(topic, consumerId, size));
+    }
+
 
     // ack
     @RequestMapping("/ack")
@@ -45,14 +56,14 @@ public class MQServer {
 
     // subscribe
     @RequestMapping("/sub")
-    public Result subscribe(@RequestParam("t") String topic, @RequestParam("cid") String consumerId) {
+    public Result sub(@RequestParam("t") String topic, @RequestParam("cid") String consumerId) {
         MessageQueue.sub(new MessageSubscription(topic, consumerId, -1));
         return Result.ok();
     }
 
     // unsubscribe
     @RequestMapping("/unsub")
-    public Result unsubscribe(@RequestParam("t") String topic, @RequestParam("cid") String consumerId) {
+    public Result unsub(@RequestParam("t") String topic, @RequestParam("cid") String consumerId) {
         MessageQueue.unsub(new MessageSubscription(topic, consumerId, -1));
         return Result.ok();
     }

@@ -3,6 +3,9 @@ package io.github.chasencode.csmq.model;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.util.HashMap;
+import java.util.List;
+
 /**
  * Result for MQServer
  * @Program: csmq
@@ -26,11 +29,16 @@ public class Result<T> {
     }
 
     public static Result<CSMessage<String>> msg(String msg) {
-        return new Result<>(1, CSMessage.create(msg, null));
+        return new Result<>(1, CSMessage.create(msg, new HashMap<>()));
     }
 
 
     public static Result<CSMessage<?>> msg(CSMessage<?> msg) {
+        return new Result<>(1, msg);
+    }
+
+
+    public static Result<List<CSMessage<?>>> msg(List<CSMessage<?>> msg) {
         return new Result<>(1, msg);
     }
 }

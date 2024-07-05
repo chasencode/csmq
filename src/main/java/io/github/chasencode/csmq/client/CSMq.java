@@ -1,4 +1,4 @@
-package io.github.chasencode.csmq.core;
+package io.github.chasencode.csmq.client;
 
 import io.github.chasencode.csmq.model.CSMessage;
 import lombok.SneakyThrows;
