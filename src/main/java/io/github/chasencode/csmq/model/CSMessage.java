@@ -19,11 +19,12 @@ import java.util.concurrent.atomic.AtomicLong;
 @Getter
 @AllArgsConstructor
 public class CSMessage<T> {
-    static AtomicLong idgen = new AtomicLong(0);
     //private String topic;
-    private Long id;
+    private Long id ;
     private T body;
-    private Map<String, String> headers = new HashMap<>(); // 系统属性， AMD-version = 1.0 和 properties 合并后， 用固定前缀来表示是系统属性
+    private Map<String, String> headers = new HashMap<>();
+    static AtomicLong idgen = new AtomicLong(0);
+    // 系统属性， AMD-version = 1.0 和 properties 合并后， 用固定前缀来表示是系统属性
     //private Map<String, String> properties; // 业务熟悉
 
     public static long getId() {

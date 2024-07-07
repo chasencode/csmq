@@ -4,6 +4,7 @@ import io.github.chasencode.csmq.demo.Order;
 import io.github.chasencode.csmq.model.CSMessage;
 import lombok.Getter;
 
+import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -45,6 +46,9 @@ public class CSConsumer<T> {
 
 
     public boolean ack(String topic, CSMessage<?> message) {
+        if (message.getHeaders() == null) {
+            message.setHeaders(new HashMap<>());
+        }
         final int  offset = Integer.parseInt(message.getHeaders().get("X-offset"));
         return ack(topic, offset);
     }

@@ -69,7 +69,7 @@ public class CSBroker {
     }
 
     public boolean send(String topic, CSMessage message) {
-        System.out.println("==>> send topic/message: " + topic + "/" + JSON.toJSONString(message));
+        System.out.println("==>> broker send topic/message: " + topic + "/" + JSON.toJSONString(message));
         Result<String> result = HttpUtils.httpPost(toJSONString(message),
                 brokerUrl + "/send?t=" + topic, new TypeReference<Result<String>>() {
                 });
@@ -80,7 +80,7 @@ public class CSBroker {
 
     public void sub(String topic, String consumerId) {
         System.out.println("==>> sub topic/consumerId: " + topic + "/" + consumerId);
-        Result<String> result = HttpUtils.httpGet(brokerUrl + "/sub/?t=" + topic + "&cid=" + consumerId,
+        Result<String> result = HttpUtils.httpGet(brokerUrl + "/sub?t=" + topic + "&cid=" + consumerId,
                 new TypeReference<Result<String>>() {
                 });
         System.out.println("==>> sub result: " + result);
@@ -88,7 +88,7 @@ public class CSBroker {
 
     public <T> CSMessage<T> recv(String topic, String id) {
         System.out.println("==>> recv topic/id: " + topic + "/" + id);
-        Result<CSMessage<String>> result = HttpUtils.httpGet(brokerUrl + "/recv/?t=" + topic + "&cid=" + id,
+        Result<CSMessage<String>> result = HttpUtils.httpGet(brokerUrl + "/recv?t=" + topic + "&cid=" + id,
                 new TypeReference<>() {
                 });
         System.out.println("==>> recv result: " + result);
@@ -98,7 +98,7 @@ public class CSBroker {
 
     public void unsub(String topic, String consumerId) {
         System.out.println("==>> unsub topic/consumerId: " + topic + "/" + consumerId);
-        Result<String> result = HttpUtils.httpGet(brokerUrl + "/unsub/?t=" + topic + "&cid=" + consumerId,
+        Result<String> result = HttpUtils.httpGet(brokerUrl + "/unsub?t=" + topic + "&cid=" + consumerId,
                 new TypeReference<Result<String>>() {
                 });
         System.out.println("==>> unsub result: " + result);
@@ -106,7 +106,7 @@ public class CSBroker {
 
     public boolean ack(String topic, String consumerId, int offset) {
         System.out.println("==>> ack topic/consumerId/offset: " + topic + "/" + consumerId + "/" + offset);
-        Result<String> result = HttpUtils.httpGet(brokerUrl + "/ack/?t=" + topic + "&cid=" + consumerId + "&offset=" + offset,
+        Result<String> result = HttpUtils.httpGet(brokerUrl + "/ack?t=" + topic + "&cid=" + consumerId + "&offset=" + offset,
                 new TypeReference<Result<String>>() {
                 });
         System.out.println(" ===>> ack result: " + result);

@@ -3,10 +3,7 @@ package io.github.chasencode.csmq.server;
 import io.github.chasencode.csmq.model.CSMessage;
 import io.github.chasencode.csmq.model.Result;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -22,9 +19,8 @@ public class MQServer {
 
 
     // send
-    @RequestMapping("/send")
-    public Result<String> send(@RequestParam("t") String topic,
-                               @RequestBody CSMessage<String> message) {
+    @PostMapping("/send")
+    public Result<String> send(@RequestBody CSMessage<String> message, @RequestParam("t") String topic) {
         ;
         return Result.ok("" + MessageQueue.send(topic, message));
     }

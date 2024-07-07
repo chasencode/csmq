@@ -1,5 +1,6 @@
 package io.github.chasencode.csmq.server;
 
+import com.alibaba.fastjson.JSON;
 import io.github.chasencode.csmq.model.CSMessage;
 
 import java.util.*;
@@ -65,6 +66,9 @@ public class MessageQueue {
         if (index >= queue.length) {
             return -1;
         }
+        if (message.getHeaders() == null) {
+            message.setHeaders(new HashMap<>());
+        }
         message.getHeaders().put("X-offset", String.valueOf(index));
         queue[index++] = message;
         return index;
@@ -110,7 +114,7 @@ public class MessageQueue {
 
     public static int send(String topic, CSMessage<?> message) {
         final MessageQueue messageQueue = queues.get(topic);
-        System.out.println("===>> server send: topic/message = " + topic + "/" + messageQueue);
+        System.out.println("===>> server send: topic/message = " + topic + "/" + JSON.toJSONString(message));
         if (messageQueue == null) {
             throw new RuntimeException("topic not found");
         }
