@@ -47,7 +47,7 @@ public class MQServer {
     public Result<String> ack(@RequestParam("t") String topic,
                               @RequestParam("cid") String consumerId,
                               @RequestParam("offset") Integer offset) {
-        return Result.ok();
+        return Result.ok("" + MessageQueue.ack(topic, consumerId, offset));
     }
 
     // subscribe
