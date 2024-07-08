@@ -47,17 +47,18 @@ public class MessageQueue {
             List<CSMessage<?>> result = new LinkedList<>();
             // 看35分钟左右解释
 //            final CSMessage<?> message = messageQueue.receive(ind + 1);
-            final CSMessage<?> message = messageQueue.receive(offset);
+            CSMessage<?> message = messageQueue.receive(offset);
             while(message != null) {
                 result.add(message);
                 if (result.size() >= size) {
                     break;
                 }
-                messageQueue.receive(++offset);
+                message = messageQueue.receive(++offset);
             }
-            System.out.println("===>> recv: topic/cid/size = "
+            System.out.println("===>> batch: topic/cid/size = "
                     + topic + "/" + consumerId + "/" + result.size());
             System.out.println("===>>last message = " + message);
+            return result;
         }
         throw new RuntimeException("subscriptions not found for topic/consumerId =" + topic + "/" + consumerId);
     }

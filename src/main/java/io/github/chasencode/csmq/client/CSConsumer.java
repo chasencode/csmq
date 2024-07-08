@@ -5,6 +5,7 @@ import io.github.chasencode.csmq.model.CSMessage;
 import lombok.Getter;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -40,6 +41,13 @@ public class CSConsumer<T> {
         return broker.recv(top, id);
     }
 
+
+
+    public List<CSMessage<T>> batch(String top) {
+        return broker.batch(top, id);
+    }
+
+
     public boolean ack(String topic, int offset) {
         return broker.ack(topic, id, offset);
     }
@@ -57,6 +65,7 @@ public class CSConsumer<T> {
         this.listener = listener;
         broker.addConsumer(topic,this);
     }
+
     @Getter
     private CSListener listener;
 

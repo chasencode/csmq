@@ -42,13 +42,19 @@ public class CSBroker {
             final MultiValueMap<String, CSConsumer<?>> consumers = getDefault().getConsumers();
             consumers.forEach((topic, consumerList) -> {
                 consumerList.forEach(consumer -> {
-                    final CSMessage<?> recv = consumer.recv(topic);
-                    if (recv != null) {
+                    List<? extends CSMessage<?>> batch = consumer.batch(topic);
+                    if (batch == null) {
                         return;
                     }
                     try {
-                        consumer.getListener().onMessage(recv);
-                        consumer.ack(topic, recv);
+                        batch.forEach(recv -> {
+                            try {
+                                consumer.getListener().onMessage(recv);
+                                consumer.ack(topic, recv);
+                            } catch (Exception e) { // @todo 重试
+                                return;
+                            }
+                        });
                     } catch (Exception e) {
                         // @todo 重试
                         return;
@@ -95,6 +101,15 @@ public class CSBroker {
         return (CSMessage<T>)  result.getData();
     }
 
+
+    public <T> List<CSMessage<T>> batch(String topic, String id) {
+        System.out.println("==>> batch topic/id: " + topic + "/" + id);
+        Result<List<CSMessage<T>>> result = HttpUtils.httpGet(brokerUrl + "/batch?t=" + topic + "&cid=" + id,
+                new TypeReference<>() {
+                });
+        System.out.println("==>> batch result: " + result);
+        return result.getData();
+    }
 
     public void unsub(String topic, String consumerId) {
         System.out.println("==>> unsub topic/consumerId: " + topic + "/" + consumerId);
