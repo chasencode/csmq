@@ -2,6 +2,8 @@ package io.github.chasencode.csmq.server;
 
 import com.alibaba.fastjson.JSON;
 import io.github.chasencode.csmq.model.CSMessage;
+import io.github.chasencode.csmq.store.Indexer;
+import io.github.chasencode.csmq.store.Store;
 
 import java.util.*;
 
@@ -20,20 +22,23 @@ public class MessageQueue {
     public static final Map<String, MessageQueue> queues = new HashMap<>();
 
     static {
+        System.out.println("这里初始化queues");
         queues.putIfAbsent(TEST_TOPIC, new MessageQueue(TEST_TOPIC));
-        queues.putIfAbsent("a", new MessageQueue("a"));
+//        queues.putIfAbsent("a", new MessageQueue("a"));
     }
 
     private Map<String, MessageSubscription> subscriptions = new HashMap<>();
 
     private String topic;
 
-    private CSMessage<?>[] queue = new CSMessage<?>[1024 * 1000];
+    private Store store = null;
 
-    private int index = 0;
+    private CSMessage<?>[] queue = new CSMessage<?>[1024 * 1000];
 
     public MessageQueue(String topic) {
         this.topic = topic;
+        store = new Store(topic);
+        store.init();
     }
 
     public static List<CSMessage<?>> batch(String topic, String consumerId, Integer size) {
@@ -42,12 +47,16 @@ public class MessageQueue {
             throw new RuntimeException("topic not found");
         }
         if (messageQueue.subscriptions.containsKey(consumerId)) {
-            int ind = messageQueue.subscriptions.get(consumerId).getOffset();
-            int offset = ind + 1;
+            int offset = messageQueue.subscriptions.get(consumerId).getOffset();
+            int next_offset = 0;
+            if (offset > -1) {
+                final Indexer.Entry entry = Indexer.getEntry(topic, offset);
+                next_offset = offset + entry.getLength();
+            }
             List<CSMessage<?>> result = new LinkedList<>();
             // 看35分钟左右解释
 //            final CSMessage<?> message = messageQueue.receive(ind + 1);
-            CSMessage<?> message = messageQueue.receive(offset);
+            CSMessage<?> message = messageQueue.receive(next_offset);
             while(message != null) {
                 result.add(message);
                 if (result.size() >= size) {
@@ -63,23 +72,20 @@ public class MessageQueue {
         throw new RuntimeException("subscriptions not found for topic/consumerId =" + topic + "/" + consumerId);
     }
 
-    public int send(CSMessage<?> message) {
-        if (index >= queue.length) {
-            return -1;
-        }
+    public int send(CSMessage<String> message) {
         if (message.getHeaders() == null) {
             message.setHeaders(new HashMap<>());
         }
-        message.getHeaders().put("X-offset", String.valueOf(index));
-        queue[index++] = message;
-        return index;
+        int offset = store.pos();
+
+        message.getHeaders().put("X-offset", String.valueOf(offset));
+        store.write(message);
+
+        return  offset;
     }
 
-    public CSMessage<?> receive(int ind) {
-        if (ind <= index) {
-            return queue[ind];
-        }
-        return null;
+    public CSMessage<?> receive(int offset) {
+        return store.read(offset);
     }
 
     public void subscribe(MessageSubscription subscription) {
@@ -113,7 +119,7 @@ public class MessageQueue {
         messageQueue.unsubscribe(subscription);
     }
 
-    public static int send(String topic, CSMessage<?> message) {
+    public static int send(String topic, CSMessage<String> message) {
         final MessageQueue messageQueue = queues.get(topic);
         System.out.println("===>> server send: topic/message = " + topic + "/" + JSON.toJSONString(message));
         if (messageQueue == null) {
@@ -122,13 +128,13 @@ public class MessageQueue {
         return messageQueue.send(message);
     }
 
-    public static CSMessage<?> recv(String topic, String consumerId, int ind) {
+    public static CSMessage<?> recv(String topic, String consumerId, int offset) {
         final MessageQueue messageQueue = queues.get(topic);
         if (messageQueue == null) {
             throw new RuntimeException("topic not found");
         }
         if (messageQueue.subscriptions.containsKey(consumerId)) {
-            return messageQueue.receive(ind);
+            return messageQueue.receive(offset);
         }
         throw new RuntimeException("subscriptions not found for topic/consumerId =" + topic + "/" + consumerId);
 
@@ -141,11 +147,15 @@ public class MessageQueue {
             throw new RuntimeException("topic not found");
         }
         if (messageQueue.subscriptions.containsKey(consumerId)) {
-            int ind = messageQueue.subscriptions.get(consumerId).getOffset();
-            // 看35分钟左右解释
-            final CSMessage<?> message = messageQueue.receive(ind + 1);
+            int offset = messageQueue.subscriptions.get(consumerId).getOffset();
+            int next_offset = 0;
+            if (offset > -1) {
+                final Indexer.Entry entry = Indexer.getEntry(topic, offset);
+                next_offset = offset + entry.getLength();
+            }
+            final CSMessage<?> message = messageQueue.receive(next_offset);
             System.out.println("===>> recv: topic/cid/ind = "
-                    + topic + "/" + consumerId + "/" + ind);
+                    + topic + "/" + consumerId + "/" + next_offset);
             System.out.println("===>> message = " + message);
             return message;
         }
@@ -160,7 +170,7 @@ public class MessageQueue {
         }
         if (messageQueue.subscriptions.containsKey(consumerId)) {
             final MessageSubscription subscription = messageQueue.subscriptions.get(consumerId);
-            if (offset > subscription.getOffset() && offset <= messageQueue.index) {
+            if (offset > subscription.getOffset() && offset < Store.LEN) {
                 System.out.println(" ===>> ack: topic/cid/offset = "
                         + topic + "/" + consumerId + "/" + offset);
                 subscription.setOffset(offset);

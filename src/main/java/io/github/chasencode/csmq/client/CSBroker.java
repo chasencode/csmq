@@ -97,7 +97,7 @@ public class CSBroker {
         Result<CSMessage<String>> result = HttpUtils.httpGet(brokerUrl + "/recv?t=" + topic + "&cid=" + id,
                 new TypeReference<>() {
                 });
-        System.out.println("==>> recv result: " + result);
+        System.out.println("==>> recv result: " + JSON.toJSONString(result));
         return (CSMessage<T>)  result.getData();
     }
 

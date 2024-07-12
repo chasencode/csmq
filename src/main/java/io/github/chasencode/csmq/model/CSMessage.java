@@ -27,12 +27,12 @@ public class CSMessage<T> {
     // 系统属性， AMD-version = 1.0 和 properties 合并后， 用固定前缀来表示是系统属性
     //private Map<String, String> properties; // 业务熟悉
 
-    public static long getId() {
-        return idgen.getAndDecrement();
+    public static long nextId() {
+        return idgen.getAndIncrement();
     }
 
 
     public static CSMessage<String> create(String body, Map<String, String> headers) {
-        return new CSMessage<>(getId(), body,headers);
+        return new CSMessage<>(nextId(), body,headers);
     }
 }

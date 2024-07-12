@@ -30,19 +30,19 @@ public class CSMqDemo {
 
         final CSConsumer<?> consumer1 = broker.createConsumer(topic);
 
-        consumer1.listen(topic, message -> {
-            System.out.println(" onMessage =>" + message);
-        });
+//        consumer1.listen(topic, message -> {
+//            System.out.println(" onMessage =>" + message);
+//        });
 
         for (int i = 0; i < 10; i++) {
             Order order = new Order((long) ids, "time" + ids, 100 * ids);
             csProducer.send(topic, new CSMessage(ids++,  JSON.toJSONString(order), new HashMap<>()));
         }
-//        for (int i = 0; i < 10; i++) {
-//            final CSMessage<String> message = (CSMessage<String>) consumer1.recv(topic);
-//            System.out.println(message);
-//            consumer1.ack(topic, message);
-//        }
+        for (int i = 0; i < 10; i++) {
+            final CSMessage<String> message = (CSMessage<String>) consumer1.recv(topic);
+            System.out.println("receive结果" + JSON.toJSONString(message));
+            consumer1.ack(topic, message);
+        }
 
 //        while (true) {
 //            char read = (char) System.in.read();
